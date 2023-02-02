@@ -42,6 +42,10 @@
               "target": "Package",
               "version": "[1.59.0.2922, )"
             },
+            "Google.Apis.Sheets.v4": {
+              "target": "Package",
+              "version": "[1.59.0.2909, )"
+            },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
               "version": "[5.0.1, )"
@@ -49,6 +53,10 @@
             "Microsoft.EntityFrameworkCore.InMemory": {
               "target": "Package",
               "version": "[5.0.1, )"
+            },
+            "MongoDB.Driver": {
+              "target": "Package",
+              "version": "[2.19.0, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",

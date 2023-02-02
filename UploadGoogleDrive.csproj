@@ -9,6 +9,8 @@
     <PackageReference Include="Google.Apis.Drive.v3" Version="1.59.0.2922" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.1" />
+    <PackageReference Include="Google.Apis.Sheets.v4" Version="1.59.0.2909" />
+    <PackageReference Include="MongoDB.Driver" Version="2.19.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,6 +18,8 @@
     <None Remove="Models\" />
     <None Remove="Microsoft.EntityFrameworkCore.InMemory" />
     <None Remove="Microsoft.EntityFrameworkCore" />
+    <None Remove="Google.Apis.Sheets.v4" />
+    <None Remove="MongoDB.Driver" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />

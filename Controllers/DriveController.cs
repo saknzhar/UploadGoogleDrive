@@ -88,8 +88,6 @@ namespace UploadGoogleDrive.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromBody] Models.Drive model)
         {
-
-
             string[] fullname = new string[2];
             var credential = GoogleCredential.FromFile(Variables.PathToServiceAccountKeyFile)
                     .CreateScoped(DriveService.ScopeConstants.Drive);
@@ -178,8 +176,9 @@ namespace UploadGoogleDrive.Controllers
                         var results = await request.UploadAsync(CancellationToken.None);
                     }
                     Functions.deleteFile(Path.Combine(Directory.GetCurrentDirectory(), fullname[0]));
+                    
                 }
-            
+                return Ok("Загружен файл по ссылке");
             }
             else if (model.URL.StartsWith("/") || model.URL.StartsWith("\\") || model.URL[1] == ':')
             {
@@ -237,13 +236,12 @@ namespace UploadGoogleDrive.Controllers
                     request.Fields = "*";
                     var results = await request.UploadAsync(CancellationToken.None);
                 }
-                return Ok("Zagruzhen file");
+                return Ok("Загружен локальный файл");
             }
             else
             {
                 return BadRequest("Это не ссылка");
             }
-            return Ok();
         }
     
     }
