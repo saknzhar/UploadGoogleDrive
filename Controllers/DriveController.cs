@@ -123,7 +123,7 @@ namespace UploadGoogleDrive.Controllers
                 Functions.DownLoadFileAsync(model.URL, fullname[0]);
                 var fileMetadata = new Google.Apis.Drive.v3.Data.File()
                 {
-                    Name = fullname[0], // название файлка как мы его хотим сохранить
+                    Name = fullname[0] +"."+ fullname[1], // название файлка как мы его хотим сохранить
                     Parents = new List<string> { folderId }
                 };
                 string fileType = string.Empty;
@@ -144,6 +144,22 @@ namespace UploadGoogleDrive.Controllers
                     case "pdf":
                         fileType = "application/pdf";
                         break;
+                    case "zip":
+                        fileType = "application/zip";
+                        break;
+                    case "jpg":
+                        fileType = "image/jpeg";
+                        break;
+                    case "jpeg":
+                        fileType = "image/jpeg";
+                        break;
+                    case "rar":
+                        fileType = "application/vnd.rar";
+                        break;
+                    case "png":
+                        fileType = "image/png";
+                        break;
+
 
                     default:
                         fileType = "text/plain";
