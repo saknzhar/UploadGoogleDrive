@@ -54,6 +54,16 @@ namespace UploadGoogleDrive.Controllers
             }
             return false;
         }
+        internal static bool isGoogleDrive(string url)
+        {
+            Uri uri = new Uri(url);
+            string host = uri.Host;
+            if (host == "drive.google.com")
+            {
+                return true;
+            }
+            return false;
+        }
         internal static string ParseDocsId(string url)
         {
             string docsId = string.Empty;
@@ -97,6 +107,17 @@ namespace UploadGoogleDrive.Controllers
                     Parents = new List<string> { folderId },
                 };
                 copy = service.Files.Copy(copy, fileId).Execute();
+            }
+            else if (Functions.isGoogleDrive(model.URL))
+            {
+                var fileId = Functions.ParseDocsId(model.URL);
+                var file = service.Files.Get(fileId).Execute();
+
+                var copiedFile = new Google.Apis.Drive.v3.Data.File();
+                copiedFile.Name = file.Name;
+                copiedFile.Parents = new List<string> { folderId };
+
+                var request = service.Files.Copy(copiedFile, fileId).Execute();
             }
             else {
                 Functions.DownLoadFileAsync(model.URL, fullname[0]);

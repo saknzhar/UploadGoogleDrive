@@ -1,5 +1,6 @@
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/appsettings.Development.json
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/appsettings.json
+/Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/uploaddrive-376503-59084969f6b7.json
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/UploadGoogleDrive
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/UploadGoogleDrive.deps.json
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/UploadGoogleDrive.runtimeconfig.json
@@ -41,4 +42,3 @@
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/obj/Debug/net5.0/UploadGoogleDrive.pdb
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/obj/Debug/net5.0/UploadGoogleDrive.genruntimeconfig.cache
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/obj/Debug/net5.0/ref/UploadGoogleDrive.dll
-/Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/uploaddrive-376503-59084969f6b7.json
