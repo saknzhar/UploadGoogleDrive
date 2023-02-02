@@ -11,6 +11,10 @@
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Google.Apis.Auth.dll
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Google.Apis.Core.dll
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Google.Apis.Drive.v3.dll
+/Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Microsoft.EntityFrameworkCore.dll
+/Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Microsoft.EntityFrameworkCore.Abstractions.dll
+/Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Microsoft.EntityFrameworkCore.InMemory.dll
+/Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Microsoft.Extensions.DependencyInjection.dll
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Microsoft.OpenApi.dll
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Newtonsoft.Json.dll
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Swashbuckle.AspNetCore.Swagger.dll
@@ -37,7 +41,4 @@
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/obj/Debug/net5.0/UploadGoogleDrive.pdb
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/obj/Debug/net5.0/UploadGoogleDrive.genruntimeconfig.cache
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/obj/Debug/net5.0/ref/UploadGoogleDrive.dll
-/Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Microsoft.EntityFrameworkCore.dll
-/Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Microsoft.EntityFrameworkCore.Abstractions.dll
-/Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Microsoft.EntityFrameworkCore.InMemory.dll
-/Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Microsoft.Extensions.DependencyInjection.dll
+/Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/uploaddrive-376503-59084969f6b7.json
