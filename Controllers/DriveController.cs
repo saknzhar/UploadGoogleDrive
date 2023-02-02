@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
+using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
 using Google.Apis.Upload;
 using Microsoft.AspNetCore.Mvc;
@@ -41,7 +42,25 @@ namespace UploadGoogleDrive.Controllers
         }
         internal static void deleteFile(string name)
         {
-            File.Delete(name);
+            System.IO.File.Delete(name);
+        }
+        internal static bool isGoogleDocs(string url)
+        {
+            Uri uri = new Uri(url);
+            string host = uri.Host;
+            if(host == "docs.google.com")
+            {
+                return true;
+            }
+            return false;
+        }
+        internal static string ParseDocsId(string url)
+        {
+            string docsId = string.Empty;
+            int indexOfd = url.LastIndexOf("d/") + 2;
+            int indexOfSlash = url.IndexOf("/", indexOfd);
+            docsId = url.Substring(indexOfd, indexOfSlash - indexOfd);
+            return docsId;
         }
     }
     public class Variables
@@ -57,55 +76,68 @@ namespace UploadGoogleDrive.Controllers
     public class DriveController : ControllerBase
     {
         [HttpPost]
-        public async Task<IActionResult> PostAsync([FromBody] Drive model)
+        public async Task<IActionResult> PostAsync([FromBody] Models.Drive model)
         {
             string[] fullname = Functions.ExtractFileNameAndExtension(model.URL);
-
-            Functions.DownLoadFileAsync(model.URL, fullname[0]);
+            
             var credential = GoogleCredential.FromFile(Variables.PathToServiceAccountKeyFile)
                 .CreateScoped(DriveService.ScopeConstants.Drive);
             var service = new DriveService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential
             });
-            var fileMetadata = new Google.Apis.Drive.v3.Data.File()
+            var folderId = "1CYKO45fM5lw_t20FMoUXCuc9qhUdCVyU";
+            if (Functions.isGoogleDocs(model.URL))
             {
-                Name = fullname[0], // название файлка как мы его хотим сохранить
-                Parents = new List<string>{ "1CYKO45fM5lw_t20FMoUXCuc9qhUdCVyU" }
-            };
-            string fileType = string.Empty;
-
-            switch (fullname[1]){
-                case "doc":
-                    fileType = "application/msword";
-                    break;
-                case "docx":
-                    fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-                    break;
-                case "xls":
-                    fileType = "application/vnd.ms-excel";
-                    break;
-                case "xlsx":
-                    fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-                    break;
-                case "pdf":
-                    fileType = "application/pdf";
-                    break;
-
-                default:
-                    fileType = "text/plain";
-                    break; 
+                var fileId = Functions.ParseDocsId(model.URL);
+                var file = service.Files.Get(fileId).Execute();
+                var copy = new Google.Apis.Drive.v3.Data.File
+                {
+                    Name = file.Name,
+                    Parents = new List<string> { folderId },
+                };
+                copy = service.Files.Copy(copy, fileId).Execute();
             }
+            else {
+                Functions.DownLoadFileAsync(model.URL, fullname[0]);
+                var fileMetadata = new Google.Apis.Drive.v3.Data.File()
+                {
+                    Name = fullname[0], // название файлка как мы его хотим сохранить
+                    Parents = new List<string> { folderId }
+                };
+                string fileType = string.Empty;
 
-            await using (var fsSource = new FileStream(fullname[0], FileMode.Open, FileAccess.Read))
-            {
-                // Create a new file, with metadata and stream.
-                var request = service.Files.Create(fileMetadata, fsSource, fileType);
-                request.Fields = "*";
-                var results = await request.UploadAsync(CancellationToken.None);
+                switch (fullname[1]) {
+                    case "doc":
+                        fileType = "application/msword";
+                        break;
+                    case "docx":
+                        fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                        break;
+                    case "xls":
+                        fileType = "application/vnd.ms-excel";
+                        break;
+                    case "xlsx":
+                        fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                        break;
+                    case "pdf":
+                        fileType = "application/pdf";
+                        break;
+
+                    default:
+                        fileType = "text/plain";
+                        break;
+                }
+
+                await using (var fsSource = new FileStream(fullname[0], FileMode.Open, FileAccess.Read))
+                {
+                    // Create a new file, with metadata and stream.
+                    var request = service.Files.Create(fileMetadata, fsSource, fileType);
+                    request.Fields = "*";
+                    var results = await request.UploadAsync(CancellationToken.None);
+                }
+                Functions.deleteFile(Path.Combine(Directory.GetCurrentDirectory(), fullname[0]));
             }
-            Functions.deleteFile(Path.Combine(Directory.GetCurrentDirectory(), fullname[0]));
-           
             return Ok(model.URL);
         }
     
