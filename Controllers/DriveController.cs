@@ -14,6 +14,7 @@ using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
 using Google.Apis.Upload;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic.FileIO;
 using UploadGoogleDrive.Models;
 namespace UploadGoogleDrive.Controllers
 {
@@ -79,7 +80,6 @@ namespace UploadGoogleDrive.Controllers
         public const string ServiceAccountEmail = "uploaddrive@uploaddrive-376503.iam.gserviceaccount.com";
         public string UploadFileName = string.Empty;
         public string FolderId = string.Empty;
-        
     }
     [ApiController]
     [Route("[controller]")]
@@ -88,47 +88,113 @@ namespace UploadGoogleDrive.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromBody] Models.Drive model)
         {
-            string[] fullname = Functions.ExtractFileNameAndExtension(model.URL);
-            
+
+
+            string[] fullname = new string[2];
             var credential = GoogleCredential.FromFile(Variables.PathToServiceAccountKeyFile)
-                .CreateScoped(DriveService.ScopeConstants.Drive);
+                    .CreateScoped(DriveService.ScopeConstants.Drive);
             var service = new DriveService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential
             });
             var folderId = "1CYKO45fM5lw_t20FMoUXCuc9qhUdCVyU";
-            if (Functions.isGoogleDocs(model.URL))
+            if (model.URL.StartsWith("http://") || model.URL.StartsWith("https://"))
             {
-                var fileId = Functions.ParseDocsId(model.URL);
-                var file = service.Files.Get(fileId).Execute();
-                var copy = new Google.Apis.Drive.v3.Data.File
+                fullname = Functions.ExtractFileNameAndExtension(model.URL);
+                if (Functions.isGoogleDocs(model.URL))
                 {
-                    Name = file.Name,
-                    Parents = new List<string> { folderId },
-                };
-                copy = service.Files.Copy(copy, fileId).Execute();
+                    var fileId = Functions.ParseDocsId(model.URL);
+                    var file = service.Files.Get(fileId).Execute();
+                    var copy = new Google.Apis.Drive.v3.Data.File
+                    {
+                        Name = file.Name,
+                        Parents = new List<string> { folderId },
+                    };
+                    copy = service.Files.Copy(copy, fileId).Execute();
+                }
+                else if (Functions.isGoogleDrive(model.URL))
+                {
+                    var fileId = Functions.ParseDocsId(model.URL);
+                    var file = service.Files.Get(fileId).Execute();
+
+                    var copiedFile = new Google.Apis.Drive.v3.Data.File();
+                    copiedFile.Name = file.Name;
+                    copiedFile.Parents = new List<string> { folderId };
+
+                    var request = service.Files.Copy(copiedFile, fileId).Execute();
+                }
+                else
+                {
+                    Functions.DownLoadFileAsync(model.URL, fullname[0]);
+                    var fileMetadata = new Google.Apis.Drive.v3.Data.File()
+                    {
+                        Name = fullname[0] + "." + fullname[1], // название файлка как мы его хотим сохранить
+                        Parents = new List<string> { folderId }
+                    };
+                    string fileType = string.Empty;
+
+                    switch (fullname[1])
+                    {
+                        case "doc":
+                            fileType = "application/msword";
+                            break;
+                        case "docx":
+                            fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                            break;
+                        case "xls":
+                            fileType = "application/vnd.ms-excel";
+                            break;
+                        case "xlsx":
+                            fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                            break;
+                        case "pdf":
+                            fileType = "application/pdf";
+                            break;
+                        case "zip":
+                            fileType = "application/zip";
+                            break;
+                        case "jpg":
+                            fileType = "image/jpeg";
+                            break;
+                        case "jpeg":
+                            fileType = "image/jpeg";
+                            break;
+                        case "rar":
+                            fileType = "application/vnd.rar";
+                            break;
+                        case "png":
+                            fileType = "image/png";
+                            break;
+                        default:
+                            fileType = "text/plain";
+                            break;
+                    }
+
+                    await using (var fsSource = new FileStream(fullname[0], FileMode.Open, FileAccess.Read))
+                    {
+                        // Create a new file, with metadata and stream.
+                        var request = service.Files.Create(fileMetadata, fsSource, fileType);
+                        request.Fields = "*";
+                        var results = await request.UploadAsync(CancellationToken.None);
+                    }
+                    Functions.deleteFile(Path.Combine(Directory.GetCurrentDirectory(), fullname[0]));
+                }
+            
             }
-            else if (Functions.isGoogleDrive(model.URL))
+            else if (model.URL.StartsWith("/") || model.URL.StartsWith("\\") || model.URL[1] == ':')
             {
-                var fileId = Functions.ParseDocsId(model.URL);
-                var file = service.Files.Get(fileId).Execute();
+                fullname = Functions.ExtractFileNameAndExtension(model.URL);
+                string filename = fullname[0];
+                string fileType = fullname[1];
 
-                var copiedFile = new Google.Apis.Drive.v3.Data.File();
-                copiedFile.Name = file.Name;
-                copiedFile.Parents = new List<string> { folderId };
-
-                var request = service.Files.Copy(copiedFile, fileId).Execute();
-            }
-            else {
-                Functions.DownLoadFileAsync(model.URL, fullname[0]);
                 var fileMetadata = new Google.Apis.Drive.v3.Data.File()
                 {
-                    Name = fullname[0] +"."+ fullname[1], // название файлка как мы его хотим сохранить
+                    Name = fullname[0] + "." + fullname[1], // название файлка как мы его хотим сохранить
                     Parents = new List<string> { folderId }
                 };
-                string fileType = string.Empty;
 
-                switch (fullname[1]) {
+                switch (fullname[1])
+                {
                     case "doc":
                         fileType = "application/msword";
                         break;
@@ -159,23 +225,25 @@ namespace UploadGoogleDrive.Controllers
                     case "png":
                         fileType = "image/png";
                         break;
-
-
                     default:
                         fileType = "text/plain";
                         break;
                 }
 
-                await using (var fsSource = new FileStream(fullname[0], FileMode.Open, FileAccess.Read))
+                await using (var fsSource = new FileStream(model.URL, FileMode.Open, FileAccess.Read))
                 {
                     // Create a new file, with metadata and stream.
                     var request = service.Files.Create(fileMetadata, fsSource, fileType);
                     request.Fields = "*";
                     var results = await request.UploadAsync(CancellationToken.None);
                 }
-                Functions.deleteFile(Path.Combine(Directory.GetCurrentDirectory(), fullname[0]));
+                return Ok("Zagruzhen file");
             }
-            return Ok(model.URL);
+            else
+            {
+                return BadRequest("Это не ссылка");
+            }
+            return Ok();
         }
     
     }
