@@ -8,11 +8,13 @@ using System.Net.Http.Headers;
 using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
+using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
 using Google.Apis.Upload;
+using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic.FileIO;
 using UploadGoogleDrive.Models;
@@ -73,6 +75,16 @@ namespace UploadGoogleDrive.Controllers
             docsId = url.Substring(indexOfd, indexOfSlash - indexOfd);
             return docsId;
         }
+        internal static bool isGosZacup(string url)
+        {
+            Uri uri = new Uri(url);
+            string host = uri.Host;
+            if (host == "goszakup.gov.kz")
+            {
+                return true;
+            }
+            return false;
+        }
     }
     public class Variables
     {
@@ -120,6 +132,15 @@ namespace UploadGoogleDrive.Controllers
                     copiedFile.Parents = new List<string> { folderId };
 
                     var request = service.Files.Copy(copiedFile, fileId).Execute();
+                }
+                else if (Functions.isGosZacup(model.URL))
+                {
+
+                    var web = new HtmlWeb();
+                    var document = web.Load(model.URL);
+
+
+
                 }
                 else
                 {

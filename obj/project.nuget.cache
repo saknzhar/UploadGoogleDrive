@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "76X9LNQbAs1uMhOywJ+34eWDNWHrpjZo9UMwxTl7FHzVUKouwHWHSmc+1/gCwN4gnpxdHOt7Z3A/yYM3Pl+rlw==",
+  "dgSpecHash": "0ZofLKrg2wLSummW+oT1vrj94lRg4ilhPJdtNCle5KIClm5eCNGFZuyF8+vYtvjmdizcMBJmyfbcL47HL2DtAg==",
   "success": true,
   "projectFilePath": "/Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/UploadGoogleDrive.csproj",
   "expectedPackageFiles": [
@@ -12,6 +12,7 @@
     "/Users/sanzh/.nuget/packages/google.apis.core/1.59.0/google.apis.core.1.59.0.nupkg.sha512",
     "/Users/sanzh/.nuget/packages/google.apis.drive.v3/1.59.0.2922/google.apis.drive.v3.1.59.0.2922.nupkg.sha512",
     "/Users/sanzh/.nuget/packages/google.apis.sheets.v4/1.59.0.2909/google.apis.sheets.v4.1.59.0.2909.nupkg.sha512",
+    "/Users/sanzh/.nuget/packages/htmlagilitypack/1.11.46/htmlagilitypack.1.11.46.nupkg.sha512",
     "/Users/sanzh/.nuget/packages/microsoft.entityframeworkcore/5.0.1/microsoft.entityframeworkcore.5.0.1.nupkg.sha512",
     "/Users/sanzh/.nuget/packages/microsoft.entityframeworkcore.abstractions/5.0.1/microsoft.entityframeworkcore.abstractions.5.0.1.nupkg.sha512",
     "/Users/sanzh/.nuget/packages/microsoft.entityframeworkcore.analyzers/5.0.1/microsoft.entityframeworkcore.analyzers.5.0.1.nupkg.sha512",

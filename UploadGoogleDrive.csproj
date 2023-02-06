@@ -11,6 +11,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.1" />
     <PackageReference Include="Google.Apis.Sheets.v4" Version="1.59.0.2909" />
     <PackageReference Include="MongoDB.Driver" Version="2.19.0" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.46" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,6 +21,7 @@
     <None Remove="Microsoft.EntityFrameworkCore" />
     <None Remove="Google.Apis.Sheets.v4" />
     <None Remove="MongoDB.Driver" />
+    <None Remove="HtmlAgilityPack" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
