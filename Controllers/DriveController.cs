@@ -85,6 +85,10 @@ namespace UploadGoogleDrive.Controllers
             }
             return false;
         }
+        internal static string getID(string s)
+        {
+            return new Uri(s).Segments[new Uri(s).Segments.Length - 1].TrimEnd('/');
+        }
     }
     public class Variables
     {
@@ -139,7 +143,7 @@ namespace UploadGoogleDrive.Controllers
                     var web = new HtmlWeb();
                     var document = web.Load(model.URL);
 
-
+                    string id = Functions.getID(model.URL);
 
                 }
                 else
