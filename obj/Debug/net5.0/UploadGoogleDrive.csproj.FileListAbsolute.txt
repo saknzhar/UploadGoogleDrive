@@ -56,4 +56,3 @@
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/obj/Debug/net5.0/UploadGoogleDrive.pdb
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/obj/Debug/net5.0/UploadGoogleDrive.genruntimeconfig.cache
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/obj/Debug/net5.0/ref/UploadGoogleDrive.dll
-/Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/mytest.json
