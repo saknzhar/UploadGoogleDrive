@@ -26,4 +26,8 @@
   <ItemGroup>
     <Folder Include="Models\" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Remove="mytest.json" />
+    <Content Remove="uploaddrive-376503-59084969f6b7.json" />
+  </ItemGroup>
 </Project>

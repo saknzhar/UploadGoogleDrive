@@ -35,6 +35,7 @@
         "dependencies": {
           "Google.Apis.Drive.v3": "1.59.0.2922",
           "Google.Apis.Sheets.v4": "1.59.0.2909",
+          "HtmlAgilityPack": "1.11.46",
           "Microsoft.EntityFrameworkCore": "5.0.1",
           "Microsoft.EntityFrameworkCore.InMemory": "5.0.1",
           "MongoDB.Driver": "2.19.0",
@@ -444,6 +445,17 @@
         },
         "compile": {
           "lib/netstandard2.0/Google.Apis.Sheets.v4.dll": {}
+        }
+      },
+      "HtmlAgilityPack/1.11.46": {
+        "runtime": {
+          "lib/netstandard2.0/HtmlAgilityPack.dll": {
+            "assemblyVersion": "1.11.46.0",
+            "fileVersion": "1.11.46.0"
+          }
+        },
+        "compile": {
+          "lib/netstandard2.0/HtmlAgilityPack.dll": {}
         }
       },
       "Microsoft.EntityFrameworkCore/5.0.1": {
@@ -2496,6 +2508,13 @@
       "sha512": "sha512-44rjavzduiDX1JSj5qRlA4Jn8DPfVmNluUYcH3T47FbeQa7Ij5AxTcYxm1EUP9zAezkdli1lyboN1s1fdtGehQ==",
       "path": "google.apis.sheets.v4/1.59.0.2909",
       "hashPath": "google.apis.sheets.v4.1.59.0.2909.nupkg.sha512"
+    },
+    "HtmlAgilityPack/1.11.46": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-dLMn4EVfJBHWmWK4Uh0XGD76FPLHI0qr2Tm0s1m/xmgiHb1JUb9zB8AzO8HtrkBBlMN6JfCUBYddhqC0hZNR+g==",
+      "path": "htmlagilitypack/1.11.46",
+      "hashPath": "htmlagilitypack.1.11.46.nupkg.sha512"
     },
     "Microsoft.EntityFrameworkCore/5.0.1": {
       "type": "package",
