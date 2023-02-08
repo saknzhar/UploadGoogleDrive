@@ -20,10 +20,12 @@ using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic.FileIO;
 using UploadGoogleDrive.Models;
+using UploadGoogleDrive.Services;
 namespace UploadGoogleDrive.Controllers
 {
     public class WebClientWithTimeout : WebClient
     {
+        
         protected override WebRequest GetWebRequest(Uri address)
         {
             WebRequest wr = base.GetWebRequest(address);
@@ -119,44 +121,7 @@ namespace UploadGoogleDrive.Controllers
                 Name = fullname[0] + "." + fullname[1], // название файлка как мы его хотим сохранить
                 Parents = new List<string> { folderid }
             };
-            string fileType = string.Empty;
-
-            switch (fullname[1])
-            {
-                case "doc":
-                    fileType = "application/msword";
-                    break;
-                case "docx":
-                    fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-                    break;
-                case "xls":
-                    fileType = "application/vnd.ms-excel";
-                    break;
-                case "xlsx":
-                    fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-                    break;
-                case "pdf":
-                    fileType = "application/pdf";
-                    break;
-                case "zip":
-                    fileType = "application/zip";
-                    break;
-                case "jpg":
-                    fileType = "image/jpeg";
-                    break;
-                case "jpeg":
-                    fileType = "image/jpeg";
-                    break;
-                case "rar":
-                    fileType = "application/vnd.rar";
-                    break;
-                case "png":
-                    fileType = "image/png";
-                    break;
-                default:
-                    fileType = "text/plain";
-                    break;
-            }
+            string fileType = SetType(fullname[1]);
 
             await using (var fsSource = new FileStream(fullname[0], FileMode.Open, FileAccess.Read))
             {
@@ -200,6 +165,47 @@ namespace UploadGoogleDrive.Controllers
             }
             return id;
         }
+        internal static string SetType(string fullname)
+        {
+            string fileType= String.Empty;
+            switch (fullname)
+            {
+                case "doc":
+                    fileType = "application/msword";
+                    break;
+                case "docx":
+                    fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                    break;
+                case "xls":
+                    fileType = "application/vnd.ms-excel";
+                    break;
+                case "xlsx":
+                    fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                    break;
+                case "pdf":
+                    fileType = "application/pdf";
+                    break;
+                case "zip":
+                    fileType = "application/zip";
+                    break;
+                case "jpg":
+                    fileType = "image/jpeg";
+                    break;
+                case "jpeg":
+                    fileType = "image/jpeg";
+                    break;
+                case "rar":
+                    fileType = "application/vnd.rar";
+                    break;
+                case "png":
+                    fileType = "image/png";
+                    break;
+                default:
+                    fileType = "text/plain";
+                    break;
+            }
+            return fileType;
+        }
     }
     public class Variables
     {
@@ -208,26 +214,29 @@ namespace UploadGoogleDrive.Controllers
         public string UploadFileName = string.Empty;
         public string FolderId = string.Empty;
     }
+    
     [ApiController]
     [Route("[controller]")]
     public class DriveController : ControllerBase
     {
+        private readonly IGoogleApiService _googleApiService;
+        public DriveController (IGoogleApiService googleApiService)
+        {
+            _googleApiService = googleApiService;
+        }
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromBody] Models.Drive model)
         {
+
+            var service = _googleApiService.Service;
             string[] fullname = new string[2];
-            var credential = GoogleCredential.FromFile(Variables.PathToServiceAccountKeyFile)
-                    .CreateScoped(DriveService.ScopeConstants.Drive);
-            var service = new DriveService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential
-            });
             var RootfolderId = "1CYKO45fM5lw_t20FMoUXCuc9qhUdCVyU";
             if (model.URL.StartsWith("http://") || model.URL.StartsWith("https://"))
             {
                 fullname = Functions.ExtractFileNameAndExtension(model.URL);
                 if (Functions.isGoogleDocs(model.URL))
                 {
+                    _googleApiService.DoSomething();
                     var fileId = Functions.ParseDocsId(model.URL);
                     var file = service.Files.Get(fileId).Execute();
                     var copy = new Google.Apis.Drive.v3.Data.File
@@ -306,7 +315,6 @@ namespace UploadGoogleDrive.Controllers
                 {
                     Functions.DownLoadFileAsync(model.URL, fullname[0]);
                     Functions.UploadFiles(model.URL, RootfolderId);
-
                 }
                 return Ok("Загружен файл по ссылке");
             }
@@ -322,42 +330,7 @@ namespace UploadGoogleDrive.Controllers
                     Parents = new List<string> { RootfolderId }
                 };
 
-                switch (fullname[1])
-                {
-                    case "doc":
-                        fileType = "application/msword";
-                        break;
-                    case "docx":
-                        fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-                        break;
-                    case "xls":
-                        fileType = "application/vnd.ms-excel";
-                        break;
-                    case "xlsx":
-                        fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-                        break;
-                    case "pdf":
-                        fileType = "application/pdf";
-                        break;
-                    case "zip":
-                        fileType = "application/zip";
-                        break;
-                    case "jpg":
-                        fileType = "image/jpeg";
-                        break;
-                    case "jpeg":
-                        fileType = "image/jpeg";
-                        break;
-                    case "rar":
-                        fileType = "application/vnd.rar";
-                        break;
-                    case "png":
-                        fileType = "image/png";
-                        break;
-                    default:
-                        fileType = "text/plain";
-                        break;
-                }
+                fileType = Functions.SetType(fullname[1]);
 
                 await using (var fsSource = new FileStream(model.URL, FileMode.Open, FileAccess.Read))
                 {

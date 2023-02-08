@@ -22,6 +22,7 @@
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Google.Apis.Core.dll
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Google.Apis.Drive.v3.dll
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Google.Apis.Sheets.v4.dll
+/Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/HtmlAgilityPack.dll
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Microsoft.EntityFrameworkCore.dll
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Microsoft.EntityFrameworkCore.Abstractions.dll
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/Microsoft.EntityFrameworkCore.InMemory.dll
@@ -55,4 +56,3 @@
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/obj/Debug/net5.0/UploadGoogleDrive.pdb
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/obj/Debug/net5.0/UploadGoogleDrive.genruntimeconfig.cache
 /Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/obj/Debug/net5.0/ref/UploadGoogleDrive.dll
-/Users/sanzh/Projects/UploadGoogleDrive/UploadGoogleDrive/bin/Debug/net5.0/HtmlAgilityPack.dll

@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Drive.v3;
+using Google.Apis.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -12,7 +15,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using UploadGoogleDrive.Controllers;
 using UploadGoogleDrive.Models;
+using UploadGoogleDrive.Services;
 
 namespace UploadGoogleDrive
 {
@@ -28,7 +33,7 @@ namespace UploadGoogleDrive
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddTransient<IGoogleApiService, GoogleApiService>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
