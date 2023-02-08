@@ -25,7 +25,6 @@ namespace UploadGoogleDrive.Controllers
 {
     public class WebClientWithTimeout : WebClient
     {
-        
         protected override WebRequest GetWebRequest(Uri address)
         {
             WebRequest wr = base.GetWebRequest(address);
@@ -96,8 +95,7 @@ namespace UploadGoogleDrive.Controllers
         internal static void GetURlToDownload(string secondValue, string id, string FolderID)
         {
             string url = "https://goszakup.gov.kz/ru/announce/actionAjaxModalShowFiles/" + id + "/" + secondValue;
-            var web = new HtmlWeb();
-            var document = web.Load(url);
+            var document = new HtmlWeb().Load(url);
             var links = document.DocumentNode.SelectNodes("//a");
             var filteredHrefValues = links.Where(n => n.Attributes["href"].Value.StartsWith("https://v3bl.goszakup.gov.kz/")).Select(n => n.Attributes["href"].Value).ToList();
             var filteredNodes = links.Where(n => n.Attributes["href"].Value.StartsWith("https://v3bl.goszakup.gov.kz/")).ToList();
@@ -122,7 +120,6 @@ namespace UploadGoogleDrive.Controllers
                 Parents = new List<string> { folderid }
             };
             string fileType = SetType(fullname[1]);
-
             await using (var fsSource = new FileStream(fullname[0], FileMode.Open, FileAccess.Read))
             {
                 // Create a new file, with metadata and stream.
@@ -133,7 +130,7 @@ namespace UploadGoogleDrive.Controllers
             Functions.deleteFile(Path.Combine(Directory.GetCurrentDirectory(), fullname[0]));
 
         }
-        internal static string CreateFolder(string FolderName, string ParentFolderID)
+        internal static string GetCreatedFolderID(string FolderName, string ParentFolderID)
         {
             string id = String.Empty;
             var credential = GoogleCredential.FromFile(Variables.PathToServiceAccountKeyFile).CreateScoped(DriveService.ScopeConstants.Drive);
@@ -227,7 +224,6 @@ namespace UploadGoogleDrive.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromBody] Models.Drive model)
         {
-
             var service = _googleApiService.Service;
             string[] fullname = new string[2];
             var RootfolderId = "1CYKO45fM5lw_t20FMoUXCuc9qhUdCVyU";
@@ -260,13 +256,10 @@ namespace UploadGoogleDrive.Controllers
                 else if (Functions.isGosZacup(model.URL))
                 {
                     model.URL += "?tab=documents";
-                    var web = new HtmlWeb();
-                    var document = web.Load(model.URL);
-
+                    var document = new HtmlWeb().Load(model.URL);
                     string id = Functions.getID(model.URL);
-
                     var buttons = document.DocumentNode.SelectNodes("//button");
-                    string s = "";
+                    string TableNamesString = "";
                     int i = 0;
                     var TimeExceeded = document.DocumentNode.SelectNodes("//table//tr//td//div");
                     if (TimeExceeded == null)
@@ -284,15 +277,15 @@ namespace UploadGoogleDrive.Controllers
                         string[] DocName = new string[td.Length];
                         string[] separators = { "<tr>", "</tr>", "Нет", "Да", "                                    ", "                                " };
                         string[] parts = td.Split(separators, StringSplitOptions.None);
-                        s += parts[1];
+                        TableNamesString += parts[1];
                         if (parts[1] != "")
                         {
-                            s += "\n";
+                            TableNamesString += "\n";
                         }
                     }
                     string[] separ = { "\n" };
-                    string[] TableName = s.Split(separ, StringSplitOptions.None);
-                    string RootFolderID = Functions.CreateFolder(id, RootfolderId);
+                    string[] TableName = TableNamesString.Split(separ, StringSplitOptions.None);
+                    string GosFolderID = Functions.GetCreatedFolderID(id, RootfolderId);
                     int j = 0;
                     foreach (var button in buttons)
                     {
@@ -303,8 +296,8 @@ namespace UploadGoogleDrive.Controllers
                             if (match.Success)
                             {
                                 var secondValue = match.Groups[2].Value;
-                                string d = Functions.CreateFolder(TableName[j], RootFolderID);
-                                Functions.GetURlToDownload(secondValue, id, d);
+                                string TempFolderID = Functions.GetCreatedFolderID(TableName[j], GosFolderID);
+                                Functions.GetURlToDownload(secondValue, id, TempFolderID);
                                 j++;
                             }
                         }
