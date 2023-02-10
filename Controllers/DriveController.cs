@@ -98,7 +98,7 @@ namespace UploadGoogleDrive.Controllers
         {
             return new Uri(s).Segments[new Uri(s).Segments.Length - 1].TrimEnd('/');
         }
-        internal static void GetURlToDownload(string secondValue, string id, string FolderID)
+        internal static void GetURlToDownload(string secondValue, string id, string FolderID, DriveService service)
         {
             string url = "https://goszakup.gov.kz/ru/announce/actionAjaxModalShowFiles/" + id + "/" + secondValue;
             var document = new HtmlWeb().Load(url);
@@ -106,20 +106,14 @@ namespace UploadGoogleDrive.Controllers
             var filteredHrefValues = links.Where(n => n.Attributes["href"].Value.StartsWith("https://v3bl.goszakup.gov.kz/")).Select(n => n.Attributes["href"].Value).ToList();
             var filteredNodes = links.Where(n => n.Attributes["href"].Value.StartsWith("https://v3bl.goszakup.gov.kz/")).ToList();
             for (int i = 0; i < filteredHrefValues.Count; i++){
-                UploadFiles(filteredHrefValues[i] + filteredNodes[i].InnerHtml, FolderID);
+                UploadFiles(filteredHrefValues[i] + filteredNodes[i].InnerHtml, FolderID, service);
             }
         }
-        internal static async void UploadFiles(string url, string folderid)
+        internal static async void UploadFiles(string url, string folderid, DriveService service)
         {
             string[] fullname = new string[2];
             fullname = ExtractFileNameAndExtension(url);
             Functions.DownLoadFileAsync(url, fullname[0]);
-            var credential = GoogleCredential.FromFile(Variables.PathToServiceAccountKeyFile)
-                    .CreateScoped(DriveService.ScopeConstants.Drive);
-            var service = new DriveService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential
-            });
             var fileMetadata = new Google.Apis.Drive.v3.Data.File()
             {
                 Name = fullname[0] + "." + fullname[1], // название файлка как мы его хотим сохранить
@@ -136,15 +130,9 @@ namespace UploadGoogleDrive.Controllers
             Functions.deleteFile(Path.Combine(Directory.GetCurrentDirectory(), fullname[0]));
 
         }
-        internal static string GetCreatedFolderID(string FolderName, string ParentFolderID)
+        internal static string GetCreatedFolderID(string FolderName, string ParentFolderID, DriveService service)
         {
             string id = String.Empty;
-            var credential = GoogleCredential.FromFile(Variables.PathToServiceAccountKeyFile).CreateScoped(DriveService.ScopeConstants.Drive);
-            var service = new DriveService(new BaseClientService.Initializer
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = "test"
-            });
             var searchQuery = "mimeType='application/vnd.google-apps.folder' and trashed = false and name='" + FolderName + "' and parents in  '" + ParentFolderID + "'";
             var requestSearch = service.Files.List();
             requestSearch.Q = searchQuery;
@@ -212,7 +200,7 @@ namespace UploadGoogleDrive.Controllers
     }
     public class Variables
     {
-        public const string PathToServiceAccountKeyFile = @"uploaddrive-376503-59084969f6b7.json";
+        //public const string PathToServiceAccountKeyFile = @"uploaddrive-376503-59084969f6b7.json";
         public string UploadFileName = string.Empty;
         public string FolderId = string.Empty;
     }
@@ -229,7 +217,7 @@ namespace UploadGoogleDrive.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromBody] Models.Drive model)
         {
-            var service = _googleApiService.Service;
+            DriveService service = _googleApiService.GetService();
             string[] fullname = new string[2];
             var RootfolderId = "1CYKO45fM5lw_t20FMoUXCuc9qhUdCVyU";
             if (model.URL.StartsWith("http://") || model.URL.StartsWith("https://"))
@@ -237,7 +225,6 @@ namespace UploadGoogleDrive.Controllers
                 fullname = Functions.ExtractFileNameAndExtension(model.URL);
                 if (Functions.isGoogleDocs(model.URL))
                 {
-                    _googleApiService.DoSomething();
                     var fileId = Functions.ParseDocsId(model.URL);
                     var file = service.Files.Get(fileId).Execute();
                     var copy = new Google.Apis.Drive.v3.Data.File
@@ -290,7 +277,7 @@ namespace UploadGoogleDrive.Controllers
                     }
                     string[] separ = { "\n" };
                     string[] TableName = TableNamesString.Split(separ, StringSplitOptions.None);
-                    string GosFolderID = Functions.GetCreatedFolderID(id, RootfolderId);
+                    string GosFolderID = Functions.GetCreatedFolderID(id, RootfolderId, service);
                     int j = 0;
                     foreach (var button in buttons)
                     {
@@ -301,8 +288,8 @@ namespace UploadGoogleDrive.Controllers
                             if (match.Success)
                             {
                                 var secondValue = match.Groups[2].Value;
-                                string TempFolderID = Functions.GetCreatedFolderID(TableName[j], GosFolderID);
-                                Functions.GetURlToDownload(secondValue, id, TempFolderID);
+                                string TempFolderID = Functions.GetCreatedFolderID(TableName[j], GosFolderID, service);
+                                Functions.GetURlToDownload(secondValue, id, TempFolderID, service);
                                 j++;
                             }
                         }
@@ -312,7 +299,7 @@ namespace UploadGoogleDrive.Controllers
                 else
                 {
                     Functions.DownLoadFileAsync(model.URL, fullname[0]);
-                    Functions.UploadFiles(model.URL, RootfolderId);
+                    Functions.UploadFiles(model.URL, RootfolderId, service);
                 }
                 return Ok("Загружен файл по ссылке");
             }
