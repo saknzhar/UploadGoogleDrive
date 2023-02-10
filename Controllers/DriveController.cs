@@ -43,8 +43,14 @@ namespace UploadGoogleDrive.Controllers
         {
             string[] split = url.Split('/');
             string fileName = split[split.Length - 1]; // название и расширение файла
-            string[] ans = fileName.Split('.'); ;
-            return ans;
+            string[] ans = fileName.Split('.');
+            int lastIndex = ans.Length - 1;
+            string[] firstAndSecondParts = new string[]
+            {
+                string.Join(".", ans.Take(lastIndex)),
+                ans[lastIndex]
+            };
+            return firstAndSecondParts;
         }
         internal static void deleteFile(string name)
         {
@@ -207,7 +213,6 @@ namespace UploadGoogleDrive.Controllers
     public class Variables
     {
         public const string PathToServiceAccountKeyFile = @"uploaddrive-376503-59084969f6b7.json";
-        public const string ServiceAccountEmail = "uploaddrive@uploaddrive-376503.iam.gserviceaccount.com";
         public string UploadFileName = string.Empty;
         public string FolderId = string.Empty;
     }
@@ -314,6 +319,7 @@ namespace UploadGoogleDrive.Controllers
             else if (model.URL.StartsWith("/") || model.URL.StartsWith("\\") || model.URL[1] == ':')
             {
                 fullname = Functions.ExtractFileNameAndExtension(model.URL);
+
                 string filename = fullname[0];
                 string fileType = fullname[1];
 
