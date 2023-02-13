@@ -35,12 +35,17 @@ namespace UploadGoogleDrive.Controllers
     }
     public class Functions
     {
-        internal static void DownLoadFileAsync(string URL, string filename)
+
+        public void downloadByID(string id)
+        {
+
+        }
+        public static void DownLoadFileAsync(string URL, string filename)
         {
             var client = new WebClientWithTimeout();
             client.DownloadFile(new Uri(URL), filename);
         }
-        internal static string[] ExtractFileNameAndExtension(string url)
+        public static string[] ExtractFileNameAndExtension(string url)
         {
             string[] split = url.Split('/');
             string fileName = split[split.Length - 1]; // название и расширение файла
@@ -53,11 +58,11 @@ namespace UploadGoogleDrive.Controllers
             };
             return firstAndSecondParts;
         }
-        internal static void deleteFile(string name)
+        public static void deleteFile(string name)
         {
             System.IO.File.Delete(name);
         }
-        internal static bool isGoogleDocs(string url)
+        public static bool isGoogleDocs(string url)
         {
             Uri uri = new Uri(url);
             string host = uri.Host;
@@ -67,7 +72,7 @@ namespace UploadGoogleDrive.Controllers
             }
             return false;
         }
-        internal static bool isGoogleDrive(string url)
+        public static bool isGoogleDrive(string url)
         {
             Uri uri = new Uri(url);
             string host = uri.Host;
@@ -77,7 +82,7 @@ namespace UploadGoogleDrive.Controllers
             }
             return false;
         }
-        internal static string ParseDocsId(string url)
+        public static string ParseDocsId(string url)
         {
             string docsId = string.Empty;
             int indexOfd = url.LastIndexOf("d/") + 2;
@@ -85,11 +90,7 @@ namespace UploadGoogleDrive.Controllers
             docsId = url.Substring(indexOfd, indexOfSlash - indexOfd);
             return docsId;
         }
-        internal static string getID(string s)
-        {
-            return new Uri(s).Segments[new Uri(s).Segments.Length - 1].TrimEnd('/');
-        }
-        internal static void GetURlToDownload(string secondValue, string id, string FolderID, DriveService service)
+        public static void GetURlToDownload(string secondValue, string id, string FolderID, DriveService service)
         {
             string url = "https://goszakup.gov.kz/ru/announce/actionAjaxModalShowFiles/" + id + "/" + secondValue;
             var document = new HtmlWeb().Load(url);
@@ -97,14 +98,14 @@ namespace UploadGoogleDrive.Controllers
             var filteredHrefValues = links.Where(n => n.Attributes["href"].Value.StartsWith("https://v3bl.goszakup.gov.kz/")).Select(n => n.Attributes["href"].Value).ToList();
             var filteredNodes = links.Where(n => n.Attributes["href"].Value.StartsWith("https://v3bl.goszakup.gov.kz/")).ToList();
             for (int i = 0; i < filteredHrefValues.Count; i++){
-                UploadFiles(filteredHrefValues[i] + filteredNodes[i].InnerHtml, FolderID, service);
+                UploadFiles(filteredHrefValues[i], filteredNodes[i].InnerHtml, FolderID, service);
             }
         }
-        internal static async void UploadFiles(string url, string folderid, DriveService service)
+        public static async void UploadFiles(string url, string name, string folderid, DriveService service)
         {
             string[] fullname = new string[2];
-            fullname = ExtractFileNameAndExtension(url);
-            Functions.DownLoadFileAsync(url, fullname[0]);
+            fullname = ExtractFileNameAndExtension(name);
+            DownLoadFileAsync(url, fullname[0]);
             var fileMetadata = new Google.Apis.Drive.v3.Data.File()
             {
                 Name = fullname[0] + "." + fullname[1], // название файлка как мы его хотим сохранить
@@ -120,7 +121,7 @@ namespace UploadGoogleDrive.Controllers
             }
             Functions.deleteFile(Path.Combine(Directory.GetCurrentDirectory(), fullname[0]));
         }
-        internal static string GetCreatedFolderID(string FolderName, string ParentFolderID, DriveService service)
+        public static string GetCreatedFolderID(string FolderName, string ParentFolderID, DriveService service)
         {
             string id = String.Empty;
             var searchQuery = "mimeType='application/vnd.google-apps.folder' and trashed = false and name='" + FolderName + "' and parents in  '" + ParentFolderID + "'";
@@ -146,7 +147,7 @@ namespace UploadGoogleDrive.Controllers
             }
             return id;
         }
-        internal static string SetType(string fullname)
+        public static string SetType(string fullname)
         {
             string fileType= String.Empty;
             switch (fullname)
@@ -193,7 +194,8 @@ namespace UploadGoogleDrive.Controllers
         public string UploadFileName = string.Empty;
         public string FolderId = string.Empty;
     }
-    
+
+
     [ApiController]
     [Route("[controller]")]
     public class DriveController : ControllerBase
@@ -214,6 +216,7 @@ namespace UploadGoogleDrive.Controllers
             if (model.URL.StartsWith("http://") || model.URL.StartsWith("https://"))
             {
                 fullname = Functions.ExtractFileNameAndExtension(model.URL);
+                var fulname = fullname[0] + fullname[1];
                 if (Functions.isGoogleDocs(model.URL))
                 {
                     var fileId = Functions.ParseDocsId(model.URL);
@@ -239,7 +242,7 @@ namespace UploadGoogleDrive.Controllers
                 else
                 {
                     Functions.DownLoadFileAsync(model.URL, fullname[0]);
-                    Functions.UploadFiles(model.URL, RootfolderId, service);
+                    Functions.UploadFiles(model.URL, fulname,  RootfolderId, service);
                 }
                 return Ok("Загружен файл по ссылке");
             }
