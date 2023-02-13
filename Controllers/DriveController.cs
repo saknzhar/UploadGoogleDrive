@@ -18,6 +18,7 @@ using Google.Apis.Services;
 using Google.Apis.Upload;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.VisualBasic.FileIO;
 using UploadGoogleDrive.Models;
 using UploadGoogleDrive.Services;
@@ -84,16 +85,6 @@ namespace UploadGoogleDrive.Controllers
             docsId = url.Substring(indexOfd, indexOfSlash - indexOfd);
             return docsId;
         }
-        internal static bool isGosZacup(string url)
-        {
-            Uri uri = new Uri(url);
-            string host = uri.Host;
-            if (host == "goszakup.gov.kz")
-            {
-                return true;
-            }
-            return false;
-        }
         internal static string getID(string s)
         {
             return new Uri(s).Segments[new Uri(s).Segments.Length - 1].TrimEnd('/');
@@ -128,7 +119,6 @@ namespace UploadGoogleDrive.Controllers
                 var results = await request.UploadAsync(CancellationToken.None);
             }
             Functions.deleteFile(Path.Combine(Directory.GetCurrentDirectory(), fullname[0]));
-
         }
         internal static string GetCreatedFolderID(string FolderName, string ParentFolderID, DriveService service)
         {
@@ -200,7 +190,6 @@ namespace UploadGoogleDrive.Controllers
     }
     public class Variables
     {
-        //public const string PathToServiceAccountKeyFile = @"uploaddrive-376503-59084969f6b7.json";
         public string UploadFileName = string.Empty;
         public string FolderId = string.Empty;
     }
@@ -209,9 +198,11 @@ namespace UploadGoogleDrive.Controllers
     [Route("[controller]")]
     public class DriveController : ControllerBase
     {
+        private readonly IConfiguration Configuration;
         private readonly IGoogleApiService _googleApiService;
-        public DriveController (IGoogleApiService googleApiService)
+        public DriveController (IGoogleApiService googleApiService, IConfiguration configuration)
         {
+            Configuration = configuration;
             _googleApiService = googleApiService;
         }
         [HttpPost]
@@ -219,7 +210,7 @@ namespace UploadGoogleDrive.Controllers
         {
             DriveService service = _googleApiService.GetService();
             string[] fullname = new string[2];
-            var RootfolderId = "1CYKO45fM5lw_t20FMoUXCuc9qhUdCVyU";
+            var RootfolderId = Configuration["RootFolderID"];
             if (model.URL.StartsWith("http://") || model.URL.StartsWith("https://"))
             {
                 fullname = Functions.ExtractFileNameAndExtension(model.URL);
@@ -244,57 +235,6 @@ namespace UploadGoogleDrive.Controllers
                     copiedFile.Parents = new List<string> { RootfolderId };
 
                     var request = service.Files.Copy(copiedFile, fileId).Execute();
-                }
-                else if (Functions.isGosZacup(model.URL))
-                {
-                    model.URL += "?tab=documents";
-                    var document = new HtmlWeb().Load(model.URL);
-                    string id = Functions.getID(model.URL);
-                    var buttons = document.DocumentNode.SelectNodes("//button");
-                    string TableNamesString = "";
-                    int i = 0;
-                    var TimeExceeded = document.DocumentNode.SelectNodes("//table//tr//td//div");
-                    if (TimeExceeded == null)
-                    {
-                        i = 0;
-                    }
-                    else
-                    {
-                        i = 1;
-                    }
-                    var tables = document.DocumentNode.SelectNodes("//table//tr//td");
-                    for (; i < tables.Count; i++)
-                    {
-                        string td = tables[i].InnerHtml;
-                        string[] DocName = new string[td.Length];
-                        string[] separators = { "<tr>", "</tr>", "Нет", "Да", "                                    ", "                                " };
-                        string[] parts = td.Split(separators, StringSplitOptions.None);
-                        TableNamesString += parts[1];
-                        if (parts[1] != "")
-                        {
-                            TableNamesString += "\n";
-                        }
-                    }
-                    string[] separ = { "\n" };
-                    string[] TableName = TableNamesString.Split(separ, StringSplitOptions.None);
-                    string GosFolderID = Functions.GetCreatedFolderID(id, RootfolderId, service);
-                    int j = 0;
-                    foreach (var button in buttons)
-                    {
-                        if (button.Attributes.Contains("onclick"))
-                        {
-                            var onClickValue = button.Attributes["onclick"].Value;
-                            var match = Regex.Match(onClickValue, @"actionModalShowFiles\((\d+),(\d+)\)");
-                            if (match.Success)
-                            {
-                                var secondValue = match.Groups[2].Value;
-                                string TempFolderID = Functions.GetCreatedFolderID(TableName[j], GosFolderID, service);
-                                Functions.GetURlToDownload(secondValue, id, TempFolderID, service);
-                                j++;
-                            }
-                        }
-                    }
-
                 }
                 else
                 {
@@ -329,7 +269,53 @@ namespace UploadGoogleDrive.Controllers
             }
             else
             {
-                return BadRequest("Это не ссылка");
+                var GosId = "https://goszakup.gov.kz/ru/announce/index/" + model.URL + "?tab=documents";
+                var document = new HtmlWeb().Load(GosId);
+                var buttons = document.DocumentNode.SelectNodes("//button");
+                string TableNamesString = "";
+                int i = 0;
+                var TimeExceeded = document.DocumentNode.SelectNodes("//table//tr//td//div");
+                if (TimeExceeded == null)
+                {
+                    i = 0;
+                }
+                else
+                {
+                    i = 1;
+                }
+                var tables = document.DocumentNode.SelectNodes("//table//tr//td");
+                for (; i < tables.Count; i++)
+                {
+                    string td = tables[i].InnerHtml;
+                    string[] DocName = new string[td.Length];
+                    string[] separators = { "<tr>", "</tr>", "Нет", "Да", "                                    ", "                                " };
+                    string[] parts = td.Split(separators, StringSplitOptions.None);
+                    TableNamesString += parts[1];
+                    if (parts[1] != "")
+                    {
+                        TableNamesString += "\n";
+                    }
+                }
+                string[] separ = { "\n" };
+                string[] TableName = TableNamesString.Split(separ, StringSplitOptions.None);
+                string GosFolderID = Functions.GetCreatedFolderID(model.URL, RootfolderId, service);
+                int j = 0;
+                foreach (var button in buttons)
+                {
+                    if (button.Attributes.Contains("onclick"))
+                    {
+                        var onClickValue = button.Attributes["onclick"].Value;
+                        var match = Regex.Match(onClickValue, @"actionModalShowFiles\((\d+),(\d+)\)");
+                        if (match.Success)
+                        {
+                            var secondValue = match.Groups[2].Value;
+                            string TempFolderID = Functions.GetCreatedFolderID(TableName[j], GosFolderID, service);
+                            Functions.GetURlToDownload(secondValue, model.URL, TempFolderID, service);
+                            j++;
+                        }
+                    }
+                }
+                return Ok();
             }
         }
 
